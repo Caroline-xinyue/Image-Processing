@@ -1,0 +1,23 @@
+# the variable CC is the compiler to use
+CC=g++
+# compiler flags
+CFLAGS= -g -c -Wall
+# linker flags
+LDFLAGS=-lopencv_core -lopencv_highgui
+# source files
+SOURCES=decode.cpp
+# object rule
+OBJECTS=$(SOURCES:.cpp=.o)
+# executable
+EXECUTABLE=decode
+
+all: $(SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+
+.cpp.o: $(SOURCES)
+	$(CC) $(CFLAGS) $< -o $@
+
+clean:
+	rm -f $(OBJECTS) $(EXECUTABLE) core

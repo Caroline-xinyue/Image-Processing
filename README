@@ -1,0 +1,69 @@
+/* 
+ * Program 1 [steganography]: encode.cpp decode.cpp Makefile.filter
+ *
+ * Program 2 [filter]: filter.cpp kernel.cpp kernel.h Makefile.encode
+ * Makefile.decode text1.txt text2.txt
+ *
+ * Program 3 [fancyBoard]: fancyBoard.cpp Makefile.fancyBoard
+ *
+ * Programmer: Xinyue Lexie Zhang
+ * Date submitted: 03/17/2016
+ * Instructor: Dr. Cooper
+ * Course: CS246
+ * Assignment: midterm
+ */
+
+About Makefile:
+There are two Makefile systems for this project.
+In the midterm repository, you can use make and make clean to compile all the files in the three subrepositories -- steganography, filter, fancyBoard
+
+Also, within each repository, I write a Makefile.[projectName] for each project(but 2 for steganography, one for encode and one for decode). These Makefile.[projectName] can not be shared by all the projects.
+
+Program 1:
+
+Compilation instruction:
+Note: If you call 'make' in the midterm folder, then there is no need to do 'make -f' through these separate project makefiles.
+
+Please use make -f Makefile.encode and make -f Makefile.decode to compile. Use ./encode to run the program or ./encode < file.txt to pass in the input file and use ./decode to decode the messages. If you want to save the secret messages into a file, please use ./decode > secretMessage.txt instead. Finally you may use make -f Makefile.encode clean and make -f Makefile.decode clean to remove the compiled object and executable files.
+
+Program details for the modified implementation:
+Instead of using the dst.at<Vec3d>(i, j) method as the original implementaion, I use the data array created from dst.data. To encode the messages, I first call the decTobin method to convert the ascii caracter arrays of texts to the corresponding bool array of text bits. Then write these text bits to the least significant bit of the binary representation of the image data. Since the least significant bit is either 0 or 1, I modify it by increment or decrement 1, unless this bit and the text bits are the same (aka either all even or all odd). Since overall, each channel of the pixel value only change by 1, it is guaranteed to be not noticeable by human eyes. Similar to the text encode algorithm, the text decode algorithm is basically an inverse operation of the text encode algorithm. It first calls getMsglen() to read in the first 32 data values to initialize the msglen integer value, then it reads in the least significant bit of each data value form the encoded image file and stores them into a bool array of bits. Finally it calls the binTodec(bool*) method and converts every 8 of these bits to the original text character and prints them out.
+
+Program details for the original implementation [encodeOri.cpp and decodeOri.cpp] which throws segmentation fault when the input file length is too big:
+  This program reads in the beyisbae.png file and encodes the messages[deliberately ignoring all whitespaces for cryptography purpose] -- either from a pass-in text file or the read-in user input. I make use of the binary correspondence bitset representation of the decimal uchar and by modifying only the least significant bit of each channel, the secretMessage image is guaranteed to be not noticeble by human eyes.
+  I first store the message length[msglen] into its corresponding 21 bit bitset. Then I use the 3 least significant bit of each corresponding 8 bit bitset of B, G, R channel for the first 3 pixel of the input image to store these 21 bit(a.k.a. 21 bit is stored in the 7 channels, 3 per channel, of the first 3 pixels of the input image with the G and R channel of the 3rd pixel unmodified). To store the texts, I use the least significant bit of the correponding binary bitset of each input text character into the B, G, R channels of three pixels, with the R channel of the last pixel unmodified. Finally, the program shows the image and write the image as secretMessage.png. The decode program works as an inverse operation of the encode program and convert the bitset back to the uchar and print them out to the console.
+
+Program 2:
+
+Compilation instruction:
+Note: If you call 'make' in the midterm folder, then there is no need to do 'make -f' through these separate project makefiles.
+
+Please use make -f Makefile.filter to compile the program and use ./filter img.png or ./filter img.jpg to run the program. Finally you may use make -f Makefile.filter clean to remove the compiled object and executable files.
+
+Program details:
+  The kernel.h header file specifies the class attributes and methods and the kernel.cpp implements the kernel class. All the kernel objects are stored in the filter.h header file. In the main program -- filter.cpp, we first create 5 kernel objects from the kernel class of different size or value. Then we apply these filters to the input file provided by the user through command line input and finally show and write the images.
+
+  Filters are all stored in the filter.h header file.
+
+Application of filters:
+  makeup.png: apply kern3_1
+  sexy.png: apply kern3_2
+  blurry.png: apply kern3_3
+  blonde.png: apply kern2
+  blondeBlur.png: first apply kern2 and then apply kern3_3
+  paint.png: first apply kern2 and then apply kern3_2
+  blondeMakeup.png: first apply kern2 and then apply kern3_1
+  mistery.png: apply kern5
+
+Similarity of my filters:
+  These 5 filters all try to produce the effect of photoshop-like image improving, so they share the similarity such that applying each of them or a combination of them improves the visual effect of the image. The filters make the human faces in the photos look much nicer and more beautiful, and they make the scenary paintings much more attracting.
+
+Program 3:
+
+Compilation and running instruction:
+Note: If you call 'make' in the midterm folder, then there is no need to do 'make -f' through these separate project makefiles.
+
+Please use make -f Makefile.fancyBoard to compile the program and use ./fancyBoard img1.png img2.png dst.png to run the program (notice here that you may change .png to .jpg). Finally you may use make -f Makefile.fancyBoard clean to remove the compiled object and executable files.
+
+Program details:
+  First, the program reads in the two input image files and based on the user selection of method -- either m for miniature or c for combine, the program calls the corresponding method to create the fancyBoard. The miniature method makes use of the resize method of the opencv imgproc library to resize the two input image files and then makes use of the Mat copyTo method with rect ROI to copy the selected region to the dst matrix. The combine method calls the slice method, which slice the image into an vector of Mat by applying the Mat(Mat, ROI) constructor specified in the basic structures part of the opencv documentation. Then the combine method copy the corresponding Mat to the dst matrix using the rect ROI similarly.Finally, the program shows the image with the user inputted file name and write the image.
